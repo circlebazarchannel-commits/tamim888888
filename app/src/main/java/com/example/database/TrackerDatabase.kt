@@ -20,22 +20,6 @@ data class DailyTracker(
     val parents: Boolean = false
 )
 
-@Entity(tableName = "saved_posts")
-data class SavedPost(
-    @PrimaryKey val docId: String,
-    val author: String,
-    val description: String,
-    val category: String,
-    val status: String,
-    val userId: String,
-    val telegramFileId: String,
-    val viewsCount: Long,
-    val sharesCount: Long,
-    val title: String,
-    val videoUri: String,
-    val url: String
-)
-
 @Entity(tableName = "notifications")
 data class NotificationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
@@ -64,21 +48,6 @@ interface TrackerDao {
 
     @Query("SELECT * FROM daily_tracker ORDER BY date DESC LIMIT 30")
     fun getAllHistory(): Flow<List<DailyTracker>>
-}
-
-@Dao
-interface SavedPostDao {
-    @Query("SELECT * FROM saved_posts")
-    fun getAllSavedPosts(): Flow<List<SavedPost>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun savePost(post: SavedPost)
-
-    @Delete
-    suspend fun deletePost(post: SavedPost)
-    
-    @Query("SELECT * FROM saved_posts WHERE docId = :docId")
-    suspend fun getPostById(docId: String): SavedPost?
 }
 
 @Dao
@@ -145,10 +114,9 @@ interface UserAlarmDao {
     suspend fun deleteAlarmById(id: Int)
 }
 
-@Database(entities = [DailyTracker::class, SavedPost::class, NotificationEntity::class, UserAlarm::class], version = 4, exportSchema = false)
+@Database(entities = [DailyTracker::class, NotificationEntity::class, UserAlarm::class], version = 4, exportSchema = false)
 abstract class TrackerDatabase : RoomDatabase() {
     abstract fun trackerDao(): TrackerDao
-    abstract fun savedPostDao(): SavedPostDao
     abstract fun notificationDao(): NotificationDao
     abstract fun alarmDao(): UserAlarmDao
 
