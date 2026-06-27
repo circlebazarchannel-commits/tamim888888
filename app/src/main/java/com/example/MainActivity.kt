@@ -1138,52 +1138,151 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
 
              Card(
                  modifier = Modifier.fillMaxWidth(),
-                 shape = RoundedCornerShape(12.dp),
+                 shape = RoundedCornerShape(16.dp),
                  colors = CardDefaults.cardColors(containerColor = Color.White),
                  border = BorderStroke(1.dp, BgLight.copy(alpha = 0.5f))
              ) {
-                 Column(
-                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                 Row(
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .height(IntrinsicSize.Min)
+                         .padding(horizontal = 14.dp, vertical = 14.dp),
+                     horizontalArrangement = Arrangement.SpaceBetween
                  ) {
-                     // Duha
-                     NaflSalatRow(
-                        icon = Icons.Outlined.WbSunny,
-                        name = if (GlobalLanguage.isEnglish) "Duha / Chasht" else "দুহা / চাশত",
-                        time = formatTimeRange(chashtHours, dhuhrHours - 5.0/60.0),
-                        label = if (GlobalLanguage.isEnglish) "Morning" else "সকাল"
+                     // Left Column: Nafl Salat Times
+                     Column(
+                         modifier = Modifier
+                             .weight(1f)
+                             .padding(end = 12.dp)
+                     ) {
+                         Text(
+                             text = if (GlobalLanguage.isEnglish) "Nafl Salat" else "নফল সালাত",
+                             color = PrimaryGreen,
+                             fontWeight = FontWeight.Bold,
+                             fontSize = 13.sp,
+                             modifier = Modifier.padding(bottom = 10.dp)
+                         )
+
+                         val naflList = listOf(
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Duha / Chasht" else "দুহা / চাশত",
+                                 formatTimeRange(chashtHours, dhuhrHours - 5.0/60.0),
+                                 if (GlobalLanguage.isEnglish) "Morning" else "সকাল"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Zawal Start" else "যাওয়াল শুরু",
+                                 formatTime(dhuhrHours),
+                                 if (GlobalLanguage.isEnglish) "Noon" else "দুপুর"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Awwabin" else "আওয়াবিন",
+                                 times.maghrib.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "After Maghrib" else "মাগরিবের পর"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Tahajjud" else "তাহাজ্জুদ",
+                                 formatTimeRange(times.fajrHours - 3.0, times.fajrHours),
+                                 if (GlobalLanguage.isEnglish) "Last 1/3 of Night" else "রাতের শেষ ভাগ"
+                             )
+                         )
+
+                         naflList.forEach { prayer ->
+                             Column(modifier = Modifier.padding(bottom = 8.dp)) {
+                                 Text(
+                                     text = prayer.first,
+                                     color = TextDark,
+                                     fontWeight = FontWeight.Bold,
+                                     fontSize = 12.sp
+                                 )
+                                 Spacer(modifier = Modifier.height(2.dp))
+                                 Text(
+                                     text = prayer.second,
+                                     color = PrimaryGreen,
+                                     fontWeight = FontWeight.Medium,
+                                     fontSize = 11.sp
+                                 )
+                                 Text(
+                                     text = prayer.third,
+                                     color = TextGray,
+                                     fontSize = 9.sp
+                                 )
+                             }
+                         }
+                     }
+
+                     // Vertical Divider (Dark Line)
+                     Box(
+                         modifier = Modifier
+                             .fillMaxHeight()
+                             .width(1.dp)
+                             .background(Color(0xFFE5E7EB))
                      )
-                     
-                     HorizontalDivider(color = BgLight.copy(alpha = 0.5f), thickness = 0.5.dp, modifier = Modifier.padding(vertical = 8.dp))
-                     
-                     // Zawal
-                     NaflSalatRow(
-                        icon = Icons.Outlined.LocationOn,
-                        name = if (GlobalLanguage.isEnglish) "Zawal Start" else "যাওয়াল শুরু",
-                        time = formatTime(dhuhrHours),
-                        label = if (GlobalLanguage.isEnglish) "Noon" else "দুপুর"
-                     )
-                     
-                     HorizontalDivider(color = BgLight.copy(alpha = 0.5f), thickness = 0.5.dp, modifier = Modifier.padding(vertical = 8.dp))
-                     
-                     // Awwabin
-                     NaflSalatRow(
-                        icon = Icons.Outlined.WbTwilight,
-                        name = if (GlobalLanguage.isEnglish) "Awwabin" else "আওয়াবিন",
-                        time = times.maghrib.toBengali(),
-                        label = if (GlobalLanguage.isEnglish) "After Maghrib" else "মাগরিবের পর"
-                     )
-                     
-                     HorizontalDivider(color = BgLight.copy(alpha = 0.5f), thickness = 0.5.dp, modifier = Modifier.padding(vertical = 8.dp))
-                     
-                     // Tahajjud
-                     NaflSalatRow(
-                        icon = Icons.Outlined.DarkMode,
-                        name = if (GlobalLanguage.isEnglish) "Tahajjud" else "তাহাজ্জুদ",
-                        time = times.fajr.toBengali(),
-                        label = if (GlobalLanguage.isEnglish) "Last 1/3 of Night" else "রাতের শেষ ১/৩ হেসসা",
-                        subtitle = if (GlobalLanguage.isEnglish) "Starts: " + formatTime(times.fajrHours - 3.0) 
-                                   else "শুরু: রাত ${formatTime(times.fajrHours - 3.0)}"
-                     )
+
+                     // Right Column: Five Fard (Forz) Prayers Times
+                     Column(
+                         modifier = Modifier
+                             .weight(1f)
+                             .padding(start = 12.dp)
+                     ) {
+                         Text(
+                             text = if (GlobalLanguage.isEnglish) "Fard Salat" else "ফরজ সালাত",
+                             color = Color(0xFFEF4444),
+                             fontWeight = FontWeight.Bold,
+                             fontSize = 13.sp,
+                             modifier = Modifier.padding(bottom = 10.dp)
+                         )
+
+                         val fardList = listOf(
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Fajr" else "ফজর",
+                                 times.fajr.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "Dawn" else "ভোর"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Dhuhr" else "যোহর",
+                                 times.dhuhr.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "Noon" else "দুপুর"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Asr" else "আসর",
+                                 times.asr.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "Afternoon" else "বিকাল"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Maghrib" else "মাগরিব",
+                                 times.maghrib.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "Sunset" else "সন্ধ্যা"
+                             ),
+                             Triple(
+                                 if (GlobalLanguage.isEnglish) "Isha" else "এশা",
+                                 times.isha.toBengali(),
+                                 if (GlobalLanguage.isEnglish) "Night" else "রাত"
+                             )
+                         )
+
+                         fardList.forEach { prayer ->
+                             Column(modifier = Modifier.padding(bottom = 6.dp)) {
+                                 Text(
+                                     text = prayer.first,
+                                     color = TextDark,
+                                     fontWeight = FontWeight.Bold,
+                                     fontSize = 12.sp
+                                 )
+                                 Spacer(modifier = Modifier.height(2.dp))
+                                 Text(
+                                     text = prayer.second,
+                                     color = Color(0xFFEF4444),
+                                     fontWeight = FontWeight.Medium,
+                                     fontSize = 11.sp
+                                 )
+                                 Text(
+                                     text = prayer.third,
+                                     color = TextGray,
+                                     fontSize = 9.sp
+                                 )
+                             }
+                         }
+                     }
                  }
              }
         }
