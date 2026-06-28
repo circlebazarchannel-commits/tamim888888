@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.BackHandler
 import com.example.database.NotificationEntity
 import com.example.database.TrackerDatabase
 import com.example.ui.theme.PrimaryGreen
@@ -54,6 +55,10 @@ fun NotificationsScreen(
     
     // Selected notification for the detail screen
     var selectedNotification by remember { mutableStateOf<NotificationEntity?>(null) }
+    
+    BackHandler(enabled = selectedNotification != null) {
+        selectedNotification = null
+    }
     
     LaunchedEffect(Unit) {
         notificationDao.markAllAsRead()

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.BackHandler
 import com.example.ui.theme.*
 
 // --- Data Models ---
@@ -406,6 +407,10 @@ fun QuranScreen(onBack: () -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("সকল") } // "সকল", "মক্কী", "মাদানী"
     var activeSurah by remember { mutableStateOf<Surah?>(null) }
+    
+    BackHandler(enabled = activeSurah != null) {
+        activeSurah = null
+    }
     
     val allSurahs = remember { getSurahList() }
     val filteredSurahs = remember(searchQuery, selectedFilter) {
