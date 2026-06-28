@@ -114,7 +114,7 @@ interface UserAlarmDao {
     suspend fun deleteAlarmById(id: Int)
 }
 
-@Database(entities = [DailyTracker::class, NotificationEntity::class, UserAlarm::class], version = 4, exportSchema = false)
+@Database(entities = [DailyTracker::class, NotificationEntity::class, UserAlarm::class], version = 5, exportSchema = false)
 abstract class TrackerDatabase : RoomDatabase() {
     abstract fun trackerDao(): TrackerDao
     abstract fun notificationDao(): NotificationDao

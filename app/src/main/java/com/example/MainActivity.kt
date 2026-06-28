@@ -30,6 +30,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -1146,139 +1150,278 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                      modifier = Modifier
                          .fillMaxWidth()
                          .height(IntrinsicSize.Min)
-                         .padding(horizontal = 14.dp, vertical = 14.dp),
+                         .padding(horizontal = 12.dp, vertical = 12.dp),
                      horizontalArrangement = Arrangement.SpaceBetween
                  ) {
                      // Left Column: Nafl Salat Times
                      Column(
                          modifier = Modifier
                              .weight(1f)
-                             .padding(end = 12.dp)
+                             .padding(end = 8.dp),
+                         horizontalAlignment = Alignment.CenterHorizontally
                      ) {
                          Text(
-                             text = if (GlobalLanguage.isEnglish) "Nafl Salat" else "নফল সালাত",
-                             color = PrimaryGreen,
+                             text = if (GlobalLanguage.isEnglish) "Nafl Salat" else "নফল সালাতের ওয়াক্ত",
+                             color = TextDark,
                              fontWeight = FontWeight.Bold,
-                             fontSize = 13.sp,
-                             modifier = Modifier.padding(bottom = 10.dp)
+                             fontSize = 11.5.sp,
+                             textAlign = TextAlign.Center
                          )
+
+                         // Centered flourish under Left title
+                         Row(
+                             verticalAlignment = Alignment.CenterVertically,
+                             horizontalArrangement = Arrangement.Center,
+                             modifier = Modifier
+                                 .fillMaxWidth()
+                                 .padding(top = 2.dp, bottom = 6.dp)
+                         ) {
+                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
+                             Spacer(modifier = Modifier.width(4.dp))
+                             Text("• ✦ •", fontSize = 7.sp, color = Color(0xFF9CA3AF))
+                             Spacer(modifier = Modifier.width(4.dp))
+                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
+                         }
 
                          val naflList = listOf(
                              Triple(
-                                 if (GlobalLanguage.isEnglish) "Duha / Chasht" else "দুহা / চাশত",
-                                 formatTimeRange(chashtHours, dhuhrHours - 5.0/60.0),
-                                 if (GlobalLanguage.isEnglish) "Morning" else "সকাল"
+                                 Icons.Outlined.WbTwilight,
+                                 if (GlobalLanguage.isEnglish) "Tahajjud" else "তাহাজ্জুদ সালাত",
+                                 formatTime(times.fajrHours - 1.5)
                              ),
                              Triple(
-                                 if (GlobalLanguage.isEnglish) "Zawal Start" else "যাওয়াল শুরু",
-                                 formatTime(dhuhrHours),
-                                 if (GlobalLanguage.isEnglish) "Noon" else "দুপুর"
+                                 Icons.Outlined.MenuBook,
+                                 if (GlobalLanguage.isEnglish) "Ishraq" else "ইশরাক সালাত",
+                                 formatTime(sunriseHours + 15.0 / 60.0)
                              ),
                              Triple(
-                                 if (GlobalLanguage.isEnglish) "Awwabin" else "আওয়াবিন",
-                                 times.maghrib.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "After Maghrib" else "মাগরিবের পর"
+                                 Icons.Outlined.WbSunny,
+                                 if (GlobalLanguage.isEnglish) "Chasht" else "চাশত সালাত",
+                                 formatTime((sunriseHours + dhuhrHours) / 2.0)
                              ),
                              Triple(
-                                 if (GlobalLanguage.isEnglish) "Tahajjud" else "তাহাজ্জুদ",
-                                 formatTimeRange(times.fajrHours - 3.0, times.fajrHours),
-                                 if (GlobalLanguage.isEnglish) "Last 1/3 of Night" else "রাতের শেষ ভাগ"
+                                 Icons.Outlined.WbTwilight,
+                                 if (GlobalLanguage.isEnglish) "Awwabin" else "আওতাবীন সালাত",
+                                 formatTime(times.maghribHours + 20.0 / 60.0)
+                             ),
+                             Triple(
+                                 Icons.Outlined.DarkMode,
+                                 if (GlobalLanguage.isEnglish) "Tahajjud (Night)" else "তাহাজ্জুদ সালাত (রাত)",
+                                 formatTime(times.ishaHours + 1.5)
                              )
                          )
 
                          naflList.forEach { prayer ->
-                             Column(modifier = Modifier.padding(bottom = 8.dp)) {
-                                 Text(
-                                     text = prayer.first,
-                                     color = TextDark,
-                                     fontWeight = FontWeight.Bold,
-                                     fontSize = 12.sp
-                                 )
-                                 Spacer(modifier = Modifier.height(2.dp))
-                                 Text(
-                                     text = prayer.second,
-                                     color = PrimaryGreen,
-                                     fontWeight = FontWeight.Medium,
-                                     fontSize = 11.sp
-                                 )
-                                 Text(
-                                     text = prayer.third,
-                                     color = TextGray,
-                                     fontSize = 9.sp
+                             val formattedTime = remember(prayer.third, GlobalLanguage.isEnglish) {
+                                 val isEng = GlobalLanguage.isEnglish
+                                 val t = prayer.third
+                                 val suffix = if (isEng) {
+                                     if (t.endsWith("AM")) " AM" else if (t.endsWith("PM")) " PM" else ""
+                                 } else {
+                                     if (t.endsWith("এএম")) " এএম" else if (t.endsWith("পিএম")) " পিএম" else ""
+                                 }
+                                 val mainPart = if (suffix.isNotEmpty()) {
+                                     t.substring(0, t.length - suffix.trim().length).trim()
+                                 } else {
+                                     t
+                                 }
+                                 buildAnnotatedString {
+                                     withStyle(style = SpanStyle(fontSize = 10.5.sp, fontWeight = FontWeight.Bold)) {
+                                         append(mainPart)
+                                     }
+                                     if (suffix.isNotEmpty()) {
+                                         withStyle(style = SpanStyle(fontSize = 7.sp, fontWeight = FontWeight.Normal)) {
+                                             append(suffix)
+                                         }
+                                     }
+                                 }
+                             }
+
+                             Column(modifier = Modifier.fillMaxWidth()) {
+                                 Row(
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .padding(vertical = 5.dp),
+                                     verticalAlignment = Alignment.CenterVertically,
+                                     horizontalArrangement = Arrangement.SpaceBetween
+                                 ) {
+                                     Row(
+                                         verticalAlignment = Alignment.CenterVertically,
+                                         modifier = Modifier.weight(1f)
+                                     ) {
+                                         Icon(
+                                             imageVector = prayer.first,
+                                             contentDescription = null,
+                                             tint = TextDark.copy(alpha = 0.7f),
+                                             modifier = Modifier.size(13.dp)
+                                         )
+                                         Spacer(modifier = Modifier.width(5.dp))
+                                         Text(
+                                             text = prayer.second,
+                                             color = TextDark,
+                                             fontWeight = FontWeight.Bold,
+                                             fontSize = 10.sp,
+                                             maxLines = 1,
+                                             overflow = TextOverflow.Ellipsis
+                                         )
+                                     }
+                                     Text(
+                                         text = formattedTime,
+                                         color = TextDark,
+                                         textAlign = TextAlign.End
+                                     )
+                                 }
+                                 Box(
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .height(0.5.dp)
+                                         .background(Color(0xFFF3F4F6))
                                  )
                              }
                          }
                      }
 
-                     // Vertical Divider (Dark Line)
-                     Box(
+                     // Vertical Divider (Dark/Elegant ornament line)
+                     Column(
+                         horizontalAlignment = Alignment.CenterHorizontally,
                          modifier = Modifier
                              .fillMaxHeight()
-                             .width(1.dp)
-                             .background(Color(0xFFE5E7EB))
-                     )
+                             .width(16.dp)
+                     ) {
+                         Box(modifier = Modifier.weight(1f).width(0.5.dp).background(Color(0xFFE5E7EB)))
+                         Spacer(modifier = Modifier.height(4.dp))
+                         Text("•", fontSize = 10.sp, color = Color(0xFF9CA3AF))
+                         Spacer(modifier = Modifier.height(1.dp))
+                         Text("✦", fontSize = 11.sp, color = Color(0xFF4B5563))
+                         Spacer(modifier = Modifier.height(1.dp))
+                         Text("•", fontSize = 10.sp, color = Color(0xFF9CA3AF))
+                         Spacer(modifier = Modifier.height(4.dp))
+                         Box(modifier = Modifier.weight(1f).width(0.5.dp).background(Color(0xFFE5E7EB)))
+                     }
 
                      // Right Column: Five Fard (Forz) Prayers Times
                      Column(
                          modifier = Modifier
                              .weight(1f)
-                             .padding(start = 12.dp)
+                             .padding(start = 8.dp),
+                         horizontalAlignment = Alignment.CenterHorizontally
                      ) {
                          Text(
-                             text = if (GlobalLanguage.isEnglish) "Fard Salat" else "ফরজ সালাত",
-                             color = Color(0xFFEF4444),
+                             text = if (GlobalLanguage.isEnglish) "Fard Salat" else "পাঁচ ওয়াক্ত নামাজের সময়",
+                             color = TextDark,
                              fontWeight = FontWeight.Bold,
-                             fontSize = 13.sp,
-                             modifier = Modifier.padding(bottom = 10.dp)
+                             fontSize = 11.5.sp,
+                             textAlign = TextAlign.Center
                          )
+
+                         // Centered flourish under Right title
+                         Row(
+                             verticalAlignment = Alignment.CenterVertically,
+                             horizontalArrangement = Arrangement.Center,
+                             modifier = Modifier
+                                 .fillMaxWidth()
+                                 .padding(top = 2.dp, bottom = 6.dp)
+                         ) {
+                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
+                             Spacer(modifier = Modifier.width(4.dp))
+                             Text("• ✦ •", fontSize = 7.sp, color = Color(0xFF9CA3AF))
+                             Spacer(modifier = Modifier.width(4.dp))
+                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
+                         }
 
                          val fardList = listOf(
                              Triple(
+                                 Icons.Outlined.WbTwilight,
                                  if (GlobalLanguage.isEnglish) "Fajr" else "ফজর",
-                                 times.fajr.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "Dawn" else "ভোর"
+                                 times.fajr.toBengali()
                              ),
                              Triple(
+                                 Icons.Outlined.WbSunny,
                                  if (GlobalLanguage.isEnglish) "Dhuhr" else "যোহর",
-                                 times.dhuhr.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "Noon" else "দুপুর"
+                                 times.dhuhr.toBengali()
                              ),
                              Triple(
+                                 Icons.Outlined.WbCloudy,
                                  if (GlobalLanguage.isEnglish) "Asr" else "আসর",
-                                 times.asr.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "Afternoon" else "বিকাল"
+                                 times.asr.toBengali()
                              ),
                              Triple(
+                                 Icons.Outlined.WbTwilight,
                                  if (GlobalLanguage.isEnglish) "Maghrib" else "মাগরিব",
-                                 times.maghrib.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "Sunset" else "সন্ধ্যা"
+                                 times.maghrib.toBengali()
                              ),
                              Triple(
+                                 Icons.Outlined.DarkMode,
                                  if (GlobalLanguage.isEnglish) "Isha" else "এশা",
-                                 times.isha.toBengali(),
-                                 if (GlobalLanguage.isEnglish) "Night" else "রাত"
+                                 times.isha.toBengali()
                              )
                          )
 
                          fardList.forEach { prayer ->
-                             Column(modifier = Modifier.padding(bottom = 6.dp)) {
-                                 Text(
-                                     text = prayer.first,
-                                     color = TextDark,
-                                     fontWeight = FontWeight.Bold,
-                                     fontSize = 12.sp
-                                 )
-                                 Spacer(modifier = Modifier.height(2.dp))
-                                 Text(
-                                     text = prayer.second,
-                                     color = Color(0xFFEF4444),
-                                     fontWeight = FontWeight.Medium,
-                                     fontSize = 11.sp
-                                 )
-                                 Text(
-                                     text = prayer.third,
-                                     color = TextGray,
-                                     fontSize = 9.sp
+                             val formattedTime = remember(prayer.third, GlobalLanguage.isEnglish) {
+                                 val isEng = GlobalLanguage.isEnglish
+                                 val t = prayer.third
+                                 val suffix = if (isEng) {
+                                     if (t.endsWith("AM")) " AM" else if (t.endsWith("PM")) " PM" else ""
+                                 } else {
+                                     if (t.endsWith("এএম")) " এএম" else if (t.endsWith("পিএম")) " পিএম" else ""
+                                 }
+                                 val mainPart = if (suffix.isNotEmpty()) {
+                                     t.substring(0, t.length - suffix.trim().length).trim()
+                                 } else {
+                                     t
+                                 }
+                                 buildAnnotatedString {
+                                     withStyle(style = SpanStyle(fontSize = 10.5.sp, fontWeight = FontWeight.Bold)) {
+                                         append(mainPart)
+                                     }
+                                     if (suffix.isNotEmpty()) {
+                                         withStyle(style = SpanStyle(fontSize = 7.sp, fontWeight = FontWeight.Normal)) {
+                                             append(suffix)
+                                         }
+                                     }
+                                 }
+                             }
+
+                             Column(modifier = Modifier.fillMaxWidth()) {
+                                 Row(
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .padding(vertical = 5.dp),
+                                     verticalAlignment = Alignment.CenterVertically,
+                                     horizontalArrangement = Arrangement.SpaceBetween
+                                 ) {
+                                     Row(
+                                         verticalAlignment = Alignment.CenterVertically,
+                                         modifier = Modifier.weight(1f)
+                                     ) {
+                                         Icon(
+                                             imageVector = prayer.first,
+                                             contentDescription = null,
+                                             tint = TextDark.copy(alpha = 0.7f),
+                                             modifier = Modifier.size(13.dp)
+                                         )
+                                         Spacer(modifier = Modifier.width(5.dp))
+                                         Text(
+                                             text = prayer.second,
+                                             color = TextDark,
+                                             fontWeight = FontWeight.Bold,
+                                             fontSize = 10.sp,
+                                             maxLines = 1,
+                                             overflow = TextOverflow.Ellipsis
+                                         )
+                                     }
+                                     Text(
+                                         text = formattedTime,
+                                         color = TextDark,
+                                         textAlign = TextAlign.End
+                                     )
+                                 }
+                                 Box(
+                                     modifier = Modifier
+                                         .fillMaxWidth()
+                                         .height(0.5.dp)
+                                         .background(Color(0xFFF3F4F6))
                                  )
                              }
                          }
