@@ -2,6 +2,8 @@ import java.util.Base64
 
 plugins {
   alias(libs.plugins.android.application)
+  alias(libs.plugins.kotlin.android)
+  alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.google.devtools.ksp)
   // alias(libs.plugins.roborazzi)
   alias(libs.plugins.secrets)
@@ -9,12 +11,9 @@ plugins {
   alias(libs.plugins.kotlinx.serialization)
 }
 
-// apply(plugin = "org.jetbrains.kotlin.android")
-apply(plugin = "org.jetbrains.kotlin.plugin.compose")
-
 android {
   namespace = "com.example"
-  compileSdk = 34
+  compileSdk = 35
 
   // Decode the debug keystore from base64 if it does not exist
   val keystoreFile = file("${rootDir}/debug.keystore")
@@ -33,7 +32,7 @@ android {
   defaultConfig {
     applicationId = "com.aistudio.halalcircle.vqyptl"
     minSdk = 23
-    targetSdk = 34
+    targetSdk = 35
     versionCode = 11
     versionName = "1.8"
 

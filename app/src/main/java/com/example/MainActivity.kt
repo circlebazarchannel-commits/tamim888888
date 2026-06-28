@@ -1094,6 +1094,217 @@ fun HomeScreen(
 }
 
 @Composable
+fun OrnamentalFlourish(modifier: Modifier = Modifier, color: Color = Color(0xFF1E293B)) {
+    Canvas(modifier = modifier.fillMaxWidth().height(16.dp)) {
+        val width = size.width
+        val height = size.height
+        val centerY = height / 2f
+        val ornamentWidth = 40.dp.toPx()
+        
+        // Draw left thin line
+        drawLine(
+            color = color.copy(alpha = 0.5f),
+            start = Offset(0f, centerY),
+            end = Offset((width - ornamentWidth) / 2f, centerY),
+            strokeWidth = 1.dp.toPx()
+        )
+        
+        // Draw right thin line
+        drawLine(
+            color = color.copy(alpha = 0.5f),
+            start = Offset((width + ornamentWidth) / 2f, centerY),
+            end = Offset(width, centerY),
+            strokeWidth = 1.dp.toPx()
+        )
+        
+        // Draw decorative center scroll/flourish
+        val center = Offset(width / 2f, centerY)
+        drawCircle(
+            color = color,
+            radius = 2.5.dp.toPx(),
+            center = center
+        )
+        
+        val path = androidx.compose.ui.graphics.Path()
+        // Left loop
+        path.moveTo(center.x - 3.dp.toPx(), centerY)
+        path.quadraticTo(
+            center.x - 10.dp.toPx(), centerY - 4.dp.toPx(),
+            center.x - 14.dp.toPx(), centerY
+        )
+        path.quadraticTo(
+            center.x - 10.dp.toPx(), centerY + 4.dp.toPx(),
+            center.x - 3.dp.toPx(), centerY
+        )
+        // Right loop
+        path.moveTo(center.x + 3.dp.toPx(), centerY)
+        path.quadraticTo(
+            center.x + 10.dp.toPx(), centerY - 4.dp.toPx(),
+            center.x + 14.dp.toPx(), centerY
+        )
+        path.quadraticTo(
+            center.x + 10.dp.toPx(), centerY + 4.dp.toPx(),
+            center.x + 3.dp.toPx(), centerY
+        )
+        
+        drawPath(path = path, color = color)
+        
+        // Small dots at the very ends of the ornament
+        drawCircle(
+            color = color,
+            radius = 1.2.dp.toPx(),
+            center = Offset(center.x - 18.dp.toPx(), centerY)
+        )
+        drawCircle(
+            color = color,
+            radius = 1.2.dp.toPx(),
+            center = Offset(center.x + 18.dp.toPx(), centerY)
+        )
+    }
+}
+
+@Composable
+fun VerticalOrnament(modifier: Modifier = Modifier, color: Color = Color(0xFF1E293B)) {
+    Canvas(modifier = modifier.fillMaxHeight().width(24.dp)) {
+        val width = size.width
+        val height = size.height
+        val centerX = width / 2f
+        val ornamentHeight = 60.dp.toPx()
+        
+        // Draw top line
+        drawLine(
+            color = color.copy(alpha = 0.3f),
+            start = Offset(centerX, 0f),
+            end = Offset(centerX, (height - ornamentHeight) / 2f),
+            strokeWidth = 1.dp.toPx()
+        )
+        
+        // Draw bottom line
+        drawLine(
+            color = color.copy(alpha = 0.3f),
+            start = Offset(centerX, (height + ornamentHeight) / 2f),
+            end = Offset(centerX, height),
+            strokeWidth = 1.dp.toPx()
+        )
+        
+        // Draw vertical decorative center scroll
+        val centerY = height / 2f
+        val center = Offset(centerX, centerY)
+        
+        drawCircle(
+            color = color,
+            radius = 3.dp.toPx(),
+            center = center
+        )
+        
+        val path = androidx.compose.ui.graphics.Path()
+        // Top leaf
+        path.moveTo(centerX, centerY - 3.dp.toPx())
+        path.quadraticTo(
+            centerX - 3.dp.toPx(), centerY - 10.dp.toPx(),
+            centerX, centerY - 16.dp.toPx()
+        )
+        path.quadraticTo(
+            centerX + 3.dp.toPx(), centerY - 10.dp.toPx(),
+            centerX, centerY - 3.dp.toPx()
+        )
+        
+        // Bottom leaf
+        path.moveTo(centerX, centerY + 3.dp.toPx())
+        path.quadraticTo(
+            centerX - 3.dp.toPx(), centerY + 10.dp.toPx(),
+            centerX, centerY + 16.dp.toPx()
+        )
+        path.quadraticTo(
+            centerX + 3.dp.toPx(), centerY + 10.dp.toPx(),
+            centerX, centerY + 3.dp.toPx()
+        )
+        
+        drawPath(path = path, color = color)
+        
+        // Small dots above and below
+        drawCircle(color = color, radius = 1.5.dp.toPx(), center = Offset(centerX, centerY - 21.dp.toPx()))
+        drawCircle(color = color, radius = 1.5.dp.toPx(), center = Offset(centerX, centerY + 21.dp.toPx()))
+    }
+}
+
+@Composable
+fun SalatTimeRow(
+    icon: ImageVector,
+    name: String,
+    rawTime: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color(0xFF1E293B)
+) {
+    val isEng = GlobalLanguage.isEnglish
+    val formattedTime = remember(rawTime, isEng) {
+        val t = rawTime
+        val suffix = if (isEng) {
+            if (t.endsWith("AM")) " AM" else if (t.endsWith("PM")) " PM" else ""
+        } else {
+            if (t.endsWith("এএম")) " এএম" else if (t.endsWith("পিএম")) " পিএম" else ""
+        }
+        val mainPart = if (suffix.isNotEmpty()) {
+            t.substring(0, t.length - suffix.trim().length).trim()
+        } else {
+            t
+        }
+        buildAnnotatedString {
+            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Bold)) {
+                append(mainPart)
+            }
+            if (suffix.isNotEmpty()) {
+                withStyle(style = SpanStyle(fontSize = 8.5.sp, fontWeight = FontWeight.Normal)) {
+                    append(suffix)
+                }
+            }
+        }
+    }
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = color.copy(alpha = 0.85f),
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = name,
+                    color = color,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Text(
+                text = formattedTime,
+                color = color,
+                textAlign = TextAlign.End
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.5.dp)
+                .background(Color(0xFFE5E7EB))
+        )
+    }
+}
+
+@Composable
 fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
     Column(modifier = Modifier.padding(horizontal = 20.dp)) {
         Row(
@@ -1121,9 +1332,7 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
         state.prayerTimes?.let { times ->
              val sunriseHours = times.sunriseHours
              val dhuhrHours = times.dhuhrHours
-             val chashtHours = sunriseHours + 15.0 / 60.0
              
-             // Helper for formatting
              val formatTime = { h: Double ->
                 val totalMin = (h * 60).toInt()
                 val hour = (totalMin / 60) % 24
@@ -1132,12 +1341,6 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                 val p = if (hour >= 12) (if(isEng) "PM" else "পিএম") else (if(isEng) "AM" else "এএম")
                 val displayHour = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
                 String.format("%02d:%02d %s", displayHour, min, p).toBengali()
-             }
-             
-             val formatTimeRange = { start: Double, end: Double ->
-                val s = formatTime(start).replace(" এএম", "").replace(" পিএম", "").replace(" AM", "").replace(" PM", "")
-                val e = formatTime(end)
-                "$s - $e"
              }
 
              Card(
@@ -1164,24 +1367,14 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                              text = if (GlobalLanguage.isEnglish) "Nafl Salat" else "নফল সালাতের ওয়াক্ত",
                              color = TextDark,
                              fontWeight = FontWeight.Bold,
-                             fontSize = 11.5.sp,
+                             fontSize = 12.5.sp,
                              textAlign = TextAlign.Center
                          )
 
-                         // Centered flourish under Left title
-                         Row(
-                             verticalAlignment = Alignment.CenterVertically,
-                             horizontalArrangement = Arrangement.Center,
-                             modifier = Modifier
-                                 .fillMaxWidth()
-                                 .padding(top = 2.dp, bottom = 6.dp)
-                         ) {
-                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
-                             Spacer(modifier = Modifier.width(4.dp))
-                             Text("• ✦ •", fontSize = 7.sp, color = Color(0xFF9CA3AF))
-                             Spacer(modifier = Modifier.width(4.dp))
-                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
-                         }
+                         OrnamentalFlourish(
+                             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                             color = TextDark
+                         )
 
                          val naflList = listOf(
                              Triple(
@@ -1201,7 +1394,7 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                              ),
                              Triple(
                                  Icons.Outlined.WbTwilight,
-                                 if (GlobalLanguage.isEnglish) "Awwabin" else "আওতাবীন সালাত",
+                                 if (GlobalLanguage.isEnglish) "Awwabin" else "আওয়াবীন সালাত",
                                  formatTime(times.maghribHours + 20.0 / 60.0)
                              ),
                              Triple(
@@ -1212,92 +1405,20 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                          )
 
                          naflList.forEach { prayer ->
-                             val formattedTime = remember(prayer.third, GlobalLanguage.isEnglish) {
-                                 val isEng = GlobalLanguage.isEnglish
-                                 val t = prayer.third
-                                 val suffix = if (isEng) {
-                                     if (t.endsWith("AM")) " AM" else if (t.endsWith("PM")) " PM" else ""
-                                 } else {
-                                     if (t.endsWith("এএম")) " এএম" else if (t.endsWith("পিএম")) " পিএম" else ""
-                                 }
-                                 val mainPart = if (suffix.isNotEmpty()) {
-                                     t.substring(0, t.length - suffix.trim().length).trim()
-                                 } else {
-                                     t
-                                 }
-                                 buildAnnotatedString {
-                                     withStyle(style = SpanStyle(fontSize = 10.5.sp, fontWeight = FontWeight.Bold)) {
-                                         append(mainPart)
-                                     }
-                                     if (suffix.isNotEmpty()) {
-                                         withStyle(style = SpanStyle(fontSize = 7.sp, fontWeight = FontWeight.Normal)) {
-                                             append(suffix)
-                                         }
-                                     }
-                                 }
-                             }
-
-                             Column(modifier = Modifier.fillMaxWidth()) {
-                                 Row(
-                                     modifier = Modifier
-                                         .fillMaxWidth()
-                                         .padding(vertical = 5.dp),
-                                     verticalAlignment = Alignment.CenterVertically,
-                                     horizontalArrangement = Arrangement.SpaceBetween
-                                 ) {
-                                     Row(
-                                         verticalAlignment = Alignment.CenterVertically,
-                                         modifier = Modifier.weight(1f)
-                                     ) {
-                                         Icon(
-                                             imageVector = prayer.first,
-                                             contentDescription = null,
-                                             tint = TextDark.copy(alpha = 0.7f),
-                                             modifier = Modifier.size(13.dp)
-                                         )
-                                         Spacer(modifier = Modifier.width(5.dp))
-                                         Text(
-                                             text = prayer.second,
-                                             color = TextDark,
-                                             fontWeight = FontWeight.Bold,
-                                             fontSize = 10.sp,
-                                             maxLines = 1,
-                                             overflow = TextOverflow.Ellipsis
-                                         )
-                                     }
-                                     Text(
-                                         text = formattedTime,
-                                         color = TextDark,
-                                         textAlign = TextAlign.End
-                                     )
-                                 }
-                                 Box(
-                                     modifier = Modifier
-                                         .fillMaxWidth()
-                                         .height(0.5.dp)
-                                         .background(Color(0xFFF3F4F6))
-                                 )
-                             }
+                             SalatTimeRow(
+                                 icon = prayer.first,
+                                 name = prayer.second,
+                                 rawTime = prayer.third,
+                                 color = TextDark
+                             )
                          }
                      }
 
-                     // Vertical Divider (Dark/Elegant ornament line)
-                     Column(
-                         horizontalAlignment = Alignment.CenterHorizontally,
-                         modifier = Modifier
-                             .fillMaxHeight()
-                             .width(16.dp)
-                     ) {
-                         Box(modifier = Modifier.weight(1f).width(0.5.dp).background(Color(0xFFE5E7EB)))
-                         Spacer(modifier = Modifier.height(4.dp))
-                         Text("•", fontSize = 10.sp, color = Color(0xFF9CA3AF))
-                         Spacer(modifier = Modifier.height(1.dp))
-                         Text("✦", fontSize = 11.sp, color = Color(0xFF4B5563))
-                         Spacer(modifier = Modifier.height(1.dp))
-                         Text("•", fontSize = 10.sp, color = Color(0xFF9CA3AF))
-                         Spacer(modifier = Modifier.height(4.dp))
-                         Box(modifier = Modifier.weight(1f).width(0.5.dp).background(Color(0xFFE5E7EB)))
-                     }
+                     // Vertical Divider (Dark/Elegant classical ornament line)
+                     VerticalOrnament(
+                         modifier = Modifier.fillMaxHeight(),
+                         color = TextDark.copy(alpha = 0.8f)
+                     )
 
                      // Right Column: Five Fard (Forz) Prayers Times
                      Column(
@@ -1310,24 +1431,14 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                              text = if (GlobalLanguage.isEnglish) "Fard Salat" else "পাঁচ ওয়াক্ত নামাজের সময়",
                              color = TextDark,
                              fontWeight = FontWeight.Bold,
-                             fontSize = 11.5.sp,
+                             fontSize = 12.5.sp,
                              textAlign = TextAlign.Center
                          )
 
-                         // Centered flourish under Right title
-                         Row(
-                             verticalAlignment = Alignment.CenterVertically,
-                             horizontalArrangement = Arrangement.Center,
-                             modifier = Modifier
-                                 .fillMaxWidth()
-                                 .padding(top = 2.dp, bottom = 6.dp)
-                         ) {
-                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
-                             Spacer(modifier = Modifier.width(4.dp))
-                             Text("• ✦ •", fontSize = 7.sp, color = Color(0xFF9CA3AF))
-                             Spacer(modifier = Modifier.width(4.dp))
-                             Box(modifier = Modifier.weight(1f).height(0.5.dp).background(Color(0xFFE5E7EB)))
-                         }
+                         OrnamentalFlourish(
+                             modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                             color = TextDark
+                         )
 
                          val fardList = listOf(
                              Triple(
@@ -1358,72 +1469,12 @@ fun NaflSalatSection(state: com.example.viewmodel.ViewState) {
                          )
 
                          fardList.forEach { prayer ->
-                             val formattedTime = remember(prayer.third, GlobalLanguage.isEnglish) {
-                                 val isEng = GlobalLanguage.isEnglish
-                                 val t = prayer.third
-                                 val suffix = if (isEng) {
-                                     if (t.endsWith("AM")) " AM" else if (t.endsWith("PM")) " PM" else ""
-                                 } else {
-                                     if (t.endsWith("এএম")) " এএম" else if (t.endsWith("পিএম")) " পিএম" else ""
-                                 }
-                                 val mainPart = if (suffix.isNotEmpty()) {
-                                     t.substring(0, t.length - suffix.trim().length).trim()
-                                 } else {
-                                     t
-                                 }
-                                 buildAnnotatedString {
-                                     withStyle(style = SpanStyle(fontSize = 10.5.sp, fontWeight = FontWeight.Bold)) {
-                                         append(mainPart)
-                                     }
-                                     if (suffix.isNotEmpty()) {
-                                         withStyle(style = SpanStyle(fontSize = 7.sp, fontWeight = FontWeight.Normal)) {
-                                             append(suffix)
-                                         }
-                                     }
-                                 }
-                             }
-
-                             Column(modifier = Modifier.fillMaxWidth()) {
-                                 Row(
-                                     modifier = Modifier
-                                         .fillMaxWidth()
-                                         .padding(vertical = 5.dp),
-                                     verticalAlignment = Alignment.CenterVertically,
-                                     horizontalArrangement = Arrangement.SpaceBetween
-                                 ) {
-                                     Row(
-                                         verticalAlignment = Alignment.CenterVertically,
-                                         modifier = Modifier.weight(1f)
-                                     ) {
-                                         Icon(
-                                             imageVector = prayer.first,
-                                             contentDescription = null,
-                                             tint = TextDark.copy(alpha = 0.7f),
-                                             modifier = Modifier.size(13.dp)
-                                         )
-                                         Spacer(modifier = Modifier.width(5.dp))
-                                         Text(
-                                             text = prayer.second,
-                                             color = TextDark,
-                                             fontWeight = FontWeight.Bold,
-                                             fontSize = 10.sp,
-                                             maxLines = 1,
-                                             overflow = TextOverflow.Ellipsis
-                                         )
-                                     }
-                                     Text(
-                                         text = formattedTime,
-                                         color = TextDark,
-                                         textAlign = TextAlign.End
-                                     )
-                                 }
-                                 Box(
-                                     modifier = Modifier
-                                         .fillMaxWidth()
-                                         .height(0.5.dp)
-                                         .background(Color(0xFFF3F4F6))
-                                 )
-                             }
+                             SalatTimeRow(
+                                 icon = prayer.first,
+                                 name = prayer.second,
+                                 rawTime = prayer.third,
+                                 color = TextDark
+                             )
                          }
                      }
                  }
