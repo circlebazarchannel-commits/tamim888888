@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Halal Circle",
+  "description": "Halal Circle is a complete Islamic companion app including Salat times, Nafl Salat times, Qibla, and widgets.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
